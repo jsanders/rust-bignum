@@ -136,6 +136,7 @@ fn test_mul() {
     assert_eq!((two * three).to_str(), ~"6");
 }
 
+#[cfg(not(test))]
 fn main() {
     let x = 42.to_biguint().unwrap();
     let two = 2.to_biguint().unwrap();

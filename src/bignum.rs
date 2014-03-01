@@ -1,30 +1,7 @@
-use std::libc::{c_int,c_char,c_void,c_uint,size_t};
-use std::{str,vec,fmt};
-use std::mem::uninit;
+extern crate gmp;
 
-struct Mpz {
-    alloc: c_int,
-    size: c_int,
-    data: *c_void // Not sure if unsigned int, unsigned long, or unsigned long long
-}
-
-type MpzPtr = *Mpz;
-
-#[link(name = "gmp")]
-extern "C" {
-    // Initializing
-    fn __gmpz_init(rop: MpzPtr);
-    fn __gmpz_init_set_ui(rop: MpzPtr, op: c_uint);
-
-    // Arithmetic
-    fn __gmpz_add(rop: MpzPtr, op1: MpzPtr, op2: MpzPtr);
-    fn __gmpz_sub(rop: MpzPtr, op1: MpzPtr, op2: MpzPtr);
-    fn __gmpz_mul(rop: MpzPtr, op1: MpzPtr, op2: MpzPtr);
-
-    // Conversion
-    fn __gmpz_sizeinbase(op: MpzPtr, base: c_int) -> size_t;
-    fn __gmpz_get_str(outstr: *c_char, base: c_int, op: MpzPtr) -> *c_char;
-}
+use gmp::Mpz;
+use std::fmt;
 
 struct BigUint {
     data: Mpz
@@ -36,27 +13,18 @@ pub trait ToBigUint {
 
 impl ToBigUint for uint {
     fn to_biguint(&self) -> Option<BigUint> {
-        unsafe {
-            let data = uninit();
-            __gmpz_init_set_ui(&data, *self as c_uint);
-            Some(BigUint { data: data })
+        let mpz: Option<Mpz> = FromPrimitive::from_uint(*self);
+        match mpz {
+            Some(mpz) => Some(BigUint{ data: mpz }),
+            None      => None
         }
     }
 }
 
 impl ToStrRadix for BigUint {
     fn to_str_radix(&self, radix: uint) -> ~str {
-        unsafe {
-            let len = __gmpz_sizeinbase(&self.data, radix as c_int) as uint;
-            let dstptr = vec::from_elem(len, 0 as c_char).as_ptr();
-            let cstr = __gmpz_get_str(dstptr as *c_char, radix as c_int, &self.data);
-            str::raw::from_c_str(cstr)
-        }
+        self.data.to_str_radix(radix)
     }
-}
-
-impl ToStr for BigUint {
-    fn to_str(&self) -> ~str { self.to_str_radix(10) }
 }
 
 impl fmt::Show for BigUint {
@@ -67,34 +35,19 @@ impl fmt::Show for BigUint {
 
 impl Add<BigUint, BigUint> for BigUint {
     fn add(&self, other: &BigUint) -> BigUint {
-        unsafe {
-            let dstdata = uninit();
-            __gmpz_init(&dstdata);
-            __gmpz_add(&dstdata, &self.data, &other.data);
-            BigUint { data: dstdata }
-        }
+        BigUint{data: self.data.add(&other.data)}
     }
 }
 
 impl Sub<BigUint, BigUint> for BigUint {
     fn sub(&self, other: &BigUint) -> BigUint {
-        unsafe {
-            let dstdata = uninit();
-            __gmpz_init(&dstdata);
-            __gmpz_sub(&dstdata, &self.data, &other.data);
-            BigUint { data: dstdata }
-        }
+        BigUint{data: self.data.sub(&other.data)}
     }
 }
 
 impl Mul<BigUint, BigUint> for BigUint {
     fn mul(&self, other: &BigUint) -> BigUint {
-        unsafe {
-            let dstdata = uninit();
-            __gmpz_init(&dstdata);
-            __gmpz_mul(&dstdata, &self.data, &other.data);
-            BigUint { data: dstdata }
-        }
+        BigUint{data: self.data.mul(&other.data)}
     }
 }
 

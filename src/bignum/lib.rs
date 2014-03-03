@@ -1,9 +1,15 @@
+#[crate_id = "bignum#0.1.0-pre"];
+
+#[comment = "Bignum library for Rust"];
+#[crate_type = "rlib"];
+
 extern crate gmp;
 
 use gmp::Mpz;
 use std::fmt;
+use std::num::ToStrRadix;
 
-struct BigUint {
+pub struct BigUint {
     data: Mpz
 }
 
@@ -87,14 +93,4 @@ fn test_mul() {
 
     assert_eq!(two.mul(&three).to_str(), ~"6");
     assert_eq!((two * three).to_str(), ~"6");
-}
-
-#[cfg(not(test))]
-fn main() {
-    let x = 42.to_biguint().unwrap();
-    let two = 2.to_biguint().unwrap();
-
-    println!("{}", x + two); //-> 44
-    println!("{}", x - two); //-> 40
-    println!("{}", x * two); //-> 84
 }

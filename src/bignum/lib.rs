@@ -3,6 +3,8 @@
 #[comment = "Bignum library for Rust"];
 #[crate_type = "rlib"];
 
+#[feature(macro_rules)];
+
 extern crate gmp;
 
 use gmp::{Mpz, RandState};
@@ -41,15 +43,26 @@ pub trait ToBigUint {
     fn to_biguint(&self) -> Option<BigUint>;
 }
 
-impl ToBigUint for uint {
-    fn to_biguint(&self) -> Option<BigUint> {
-        let mpz: Option<Mpz> = FromPrimitive::from_uint(*self);
-        match mpz {
-            Some(mpz) => Some(BigUint{ data: mpz }),
-            None      => None
+macro_rules! impl_to_biguint(
+    ($T:ty, $from_ty:path) => {
+        impl ToBigUint for $T {
+            fn to_biguint(&self) -> Option<BigUint> {
+                $from_ty(*self)
+            }
         }
     }
-}
+)
+
+impl_to_biguint!(int,  FromPrimitive::from_int)
+impl_to_biguint!(i8,   FromPrimitive::from_i8)
+impl_to_biguint!(i16,  FromPrimitive::from_i16)
+impl_to_biguint!(i32,  FromPrimitive::from_i32)
+impl_to_biguint!(i64,  FromPrimitive::from_i64)
+impl_to_biguint!(uint, FromPrimitive::from_uint)
+impl_to_biguint!(u8,   FromPrimitive::from_u8)
+impl_to_biguint!(u16,  FromPrimitive::from_u16)
+impl_to_biguint!(u32,  FromPrimitive::from_u32)
+impl_to_biguint!(u64,  FromPrimitive::from_u64)
 
 impl ToStrRadix for BigUint {
     fn to_str_radix(&self, radix: uint) -> ~str {
@@ -133,7 +146,7 @@ impl<R: Rng> RandBigInt for R {
 
 #[cfg(test)]
 mod test {
-    use super::{BigUint, RandBigInt};
+    use super::{BigUint, RandBigInt, ToBigUint};
     use std::{u32,u64};
     use std::rand::task_rng;
 
@@ -141,6 +154,8 @@ mod test {
     fn test_to_and_fro() {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         assert_eq!(two.to_str(), ~"2");
+        let three = 3u.to_biguint().unwrap();
+        assert_eq!(three.to_str(), ~"3");
     }
 
     #[test]

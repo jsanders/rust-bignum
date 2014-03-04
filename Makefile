@@ -4,9 +4,10 @@ RUSTC ?= rustc
 ARCH ?= $(shell $(RUSTC) -v | grep host | cut -f 2 -d ' ')
 SYSLIBDIR ?= /usr/local/lib/rustlib/$(ARCH)/lib
 LIBSRC ?= $(SRC)/bignum/lib.rs
+LIB ?= 
 EXAMPLESRCS ?= $(wildcard $(SRC)/examples/*.rs)
 
-all: clean test lib
+all: clean test
 
 clean:
 	rm -rf $(BUILD)/* || true
@@ -14,15 +15,15 @@ clean:
 $(BUILD):
 	mkdir -p $(BUILD)
 
-test: $(BUILD) $(LIBSRC)
-	$(RUSTC) --test -o $(BUILD)/test $(LIBSRC)
-	$(BUILD)/test
-
 lib: $(BUILD) $(LIBSRC)
 	$(RUSTC) --out-dir $(BUILD) $(LIBSRC)
 
-install: lib
-	cp $(wildcard $(BUILD)/libbignum-*.rlib) $(SYSLIBDIR)
+test: lib
+	$(RUSTC) --test -o $(BUILD)/test $(LIBSRC)
+	$(BUILD)/test
+
+install: $(wildcard $(BUILD)/libbignum-*.rlib)
+	cp $? $(SYSLIBDIR)
 
 examples: $(BUILD) install $(EXAMPLESRCS)
 	mkdir $(BUILD)/examples

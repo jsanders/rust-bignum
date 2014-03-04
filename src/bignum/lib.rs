@@ -9,12 +9,20 @@ extern crate gmp;
 
 use gmp::{Mpz, RandState};
 use std::fmt;
-use std::num::ToStrRadix;
+use std::from_str::FromStr;
+use std::num::{One, Zero, ToStrRadix};
 use std::rand::Rng;
 use std::libc::c_ulong;
 
+#[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
 pub struct BigUint {
     data: Mpz
+}
+
+impl One for BigUint {
+    fn one() -> BigUint {
+        BigUint{ data: One::one() }
+    }
 }
 
 impl FromPrimitive for BigUint {
@@ -64,6 +72,16 @@ impl_to_biguint!(u16,  FromPrimitive::from_u16)
 impl_to_biguint!(u32,  FromPrimitive::from_u32)
 impl_to_biguint!(u64,  FromPrimitive::from_u64)
 
+impl FromStr for BigUint {
+    fn from_str(s: &str) -> Option<BigUint> {
+        let data: Option<Mpz> = FromStr::from_str(s);
+        match data {
+            Some(data) => Some(BigUint{ data: data }),
+            None       => None
+        }
+    }
+}
+
 impl ToStrRadix for BigUint {
     fn to_str_radix(&self, radix: uint) -> ~str {
         self.data.to_str_radix(radix)
@@ -91,6 +109,16 @@ impl Sub<BigUint, BigUint> for BigUint {
 impl Mul<BigUint, BigUint> for BigUint {
     fn mul(&self, other: &BigUint) -> BigUint {
         BigUint{data: self.data.mul(&other.data)}
+    }
+}
+
+impl BigUint {
+    pub fn is_odd(&self) -> bool {
+        self.data.is_odd()
+    }
+
+    pub fn is_even(&self) -> bool {
+        self.data.is_even()
     }
 }
 
@@ -148,14 +176,55 @@ impl<R: Rng> RandBigInt for R {
 mod test {
     use super::{BigUint, RandBigInt, ToBigUint};
     use std::{u32,u64};
+    use std::from_str::FromStr;
+    use std::num::{Zero, One};
     use std::rand::task_rng;
 
     #[test]
-    fn test_to_and_fro() {
+    fn test_clone() {
+        let two = 2u.to_biguint().unwrap();
+        let also_two = two.clone();
+        assert_eq!(two.to_str(), also_two.to_str());
+    }
+
+    #[test]
+    fn test_from_primitive() {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         assert_eq!(two.to_str(), ~"2");
+    }
+
+    #[test]
+    fn test_from_str() {
+        let two: BigUint = FromStr::from_str("2").unwrap();
+        assert_eq!(two.to_str(), ~"2");
+    }
+
+    #[test]
+    fn test_to_biguint() {
         let three = 3u.to_biguint().unwrap();
         assert_eq!(three.to_str(), ~"3");
+    }
+
+    #[test]
+    fn test_comparisons() {
+        let two = 2u.to_biguint().unwrap();
+        let also_two = 2u.to_biguint().unwrap();
+        let three = 3u.to_biguint().unwrap();
+        assert!(two == also_two);
+        assert!(two >= also_two);
+        assert!(two <= also_two);
+        assert!(three > two);
+        assert!(three >= two);
+        assert!(two < three);
+        assert!(two <= three);
+    }
+
+    #[test]
+    fn test_zero_and_one() {
+        let zero: BigUint = Zero::zero();
+        let one: BigUint = One::one();
+        assert_eq!(zero.to_str(), ~"0");
+        assert_eq!(one.to_str(), ~"1");
     }
 
     #[test]
@@ -192,7 +261,25 @@ mod test {
     }
 
     #[test]
-    fn test_gen_biguint() {
+    fn test_is_odd() {
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+
+        assert!(!two.is_odd());
+        assert!(three.is_odd());
+    }
+
+    #[test]
+    fn test_is_even() {
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+
+        assert!(two.is_even());
+        assert!(!three.is_even());
+    }
+
+    #[test]
+    fn test_rand_gen_biguint() {
         let mut rng = task_rng();
         let rand1 = rng.gen_biguint(128);
         let rand2 = rng.gen_biguint(128);
@@ -200,7 +287,7 @@ mod test {
     }
 
     #[test]
-    fn test_gen_biguint_below() {
+    fn test_rand_gen_biguint_below() {
         let mut rng = task_rng();
         let max: BigUint = FromPrimitive::from_u64(u64::MAX).unwrap();
         let rand1 = rng.gen_biguint_below(&max);
@@ -209,7 +296,7 @@ mod test {
     }
 
     #[test]
-    fn test_gen_biguint_range() {
+    fn test_rand_gen_biguint_range() {
         let mut rng = task_rng();
         let min: BigUint = FromPrimitive::from_u32(u32::MAX).unwrap();
         let max: BigUint = FromPrimitive::from_u64(u64::MAX).unwrap();

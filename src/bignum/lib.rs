@@ -19,6 +19,25 @@ pub struct BigUint {
     data: Mpz
 }
 
+impl BigUint {
+    pub fn is_odd(&self) -> bool {
+        self.data.is_odd()
+    }
+
+    pub fn is_even(&self) -> bool {
+        self.data.is_even()
+    }
+
+    pub fn divides(&self, other: &BigUint) -> bool {
+        self.data.divides(&other.data)
+    }
+
+    pub fn bits(&self) -> uint {
+        self.data.bit_length()
+    }
+}
+
+
 impl One for BigUint {
     fn one() -> BigUint {
         BigUint{ data: One::one() }
@@ -96,29 +115,44 @@ impl fmt::Show for BigUint {
 
 impl Add<BigUint, BigUint> for BigUint {
     fn add(&self, other: &BigUint) -> BigUint {
-        BigUint{data: self.data.add(&other.data)}
+        BigUint{ data: self.data.add(&other.data) }
     }
 }
 
 impl Sub<BigUint, BigUint> for BigUint {
     fn sub(&self, other: &BigUint) -> BigUint {
-        BigUint{data: self.data.sub(&other.data)}
+        BigUint{ data: self.data.sub(&other.data) }
     }
 }
 
 impl Mul<BigUint, BigUint> for BigUint {
     fn mul(&self, other: &BigUint) -> BigUint {
-        BigUint{data: self.data.mul(&other.data)}
+        BigUint{ data: self.data.mul(&other.data) }
     }
 }
 
-impl BigUint {
-    pub fn is_odd(&self) -> bool {
-        self.data.is_odd()
+impl Div<BigUint, BigUint> for BigUint {
+    fn div(&self, other: &BigUint) -> BigUint {
+        BigUint{ data: self.data.div(&other.data) }
     }
+}
 
-    pub fn is_even(&self) -> bool {
-        self.data.is_even()
+impl Rem<BigUint, BigUint> for BigUint {
+    fn rem(&self, other: &BigUint) -> BigUint {
+        BigUint{ data: self.data.rem(&other.data) }
+    }
+}
+
+impl BitAnd<BigUint, BigUint> for BigUint {
+    fn bitand(&self, other: &BigUint) -> BigUint {
+        BigUint{ data: self.data.bitand(&other.data) }
+    }
+}
+
+impl Shr<uint, BigUint> for BigUint {
+    fn shr(&self, rhs: &uint) -> BigUint {
+        let shift = *rhs as c_ulong;
+        BigUint{ data: self.data.shr(&shift) }
     }
 }
 
@@ -234,6 +268,16 @@ mod test {
     }
 
     #[test]
+    fn test_bits() {
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+        assert_eq!(three.bits(), 2);
+
+        let max64: BigUint = FromPrimitive::from_u64(u64::MAX).unwrap();
+        assert_eq!(max64.bits(), 64);
+        assert_eq!((max64 + three).bits(), 65);
+    }
+
+    #[test]
     fn test_add() {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         let three: BigUint = FromPrimitive::from_uint(3).unwrap();
@@ -261,6 +305,43 @@ mod test {
     }
 
     #[test]
+    fn test_div() {
+        let one: BigUint = FromPrimitive::from_uint(1).unwrap();
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+
+        assert_eq!(two / two, one);
+        assert_eq!(two.div(&two), one);
+    }
+
+    #[test]
+    fn test_rem() {
+        let one: BigUint = FromPrimitive::from_uint(1).unwrap();
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(three % two, one);
+        assert_eq!(three.rem(&two), one);
+    }
+
+    #[test]
+    fn test_bitand() {
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(two & three, two);
+        assert_eq!(two.bitand(&three), two);
+    }
+
+    #[test]
+    fn test_shr() {
+        let one: BigUint = FromPrimitive::from_uint(1).unwrap();
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+
+        assert_eq!(two >> 1, one);
+        assert_eq!(two.shr(&1), one);
+    }
+
+    #[test]
     fn test_is_odd() {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         let three: BigUint = FromPrimitive::from_uint(3).unwrap();
@@ -276,6 +357,17 @@ mod test {
 
         assert!(two.is_even());
         assert!(!three.is_even());
+    }
+
+    #[test]
+    fn test_divides() {
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+        let six: BigUint = FromPrimitive::from_uint(6).unwrap();
+
+        assert!(two.divides(&six));
+        assert!(three.divides(&six));
+        assert!(!two.divides(&three));
     }
 
     #[test]

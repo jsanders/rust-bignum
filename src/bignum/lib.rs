@@ -21,11 +21,11 @@ pub struct BigUint {
 
 impl BigUint {
     pub fn is_odd(&self) -> bool {
-        self.data.is_odd()
+        self.data.tstbit(0)
     }
 
     pub fn is_even(&self) -> bool {
-        self.data.is_even()
+        !self.is_odd()
     }
 
     pub fn divides(&self, other: &BigUint) -> bool {

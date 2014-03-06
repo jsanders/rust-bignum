@@ -29,16 +29,16 @@ deps:
 		$(MAKE) -w -C $$dep && $(MAKE) -w -C $$dep install ; \
 	done
 
-lib: $(BUILD) $(LIBSRC)
+lib: $(BUILD) deps $(LIBSRC)
 	$(RUSTC) --out-dir $(BUILD) $(LIBSRC)
 
-test: deps lib
+test: lib
 	$(RUSTC) --test -o $(BUILD)/test $(LIBSRC)
 	$(BUILD)/test
 
 install:
 	cp $(wildcard $(LIB)) $(SYSLIBDIR)
 
-examples: $(BUILD) install $(EXAMPLESRCS)
+examples: $(BUILD) lib install $(EXAMPLESRCS)
 	mkdir -p $(BUILD)/examples
 	$(RUSTC) $(EXAMPLESRCS) --out-dir $(BUILD)/examples

@@ -29,7 +29,7 @@ deps:
 		$(MAKE) -w -C $$dep && $(MAKE) -w -C $$dep install ; \
 	done
 
-lib: $(BUILD) deps $(LIBSRC)
+lib: $(BUILD) $(LIBSRC)
 	$(RUSTC) --out-dir $(BUILD) $(LIBSRC)
 
 test: lib

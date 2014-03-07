@@ -20,6 +20,14 @@ pub struct BigUint {
 }
 
 impl BigUint {
+    pub fn from_str_radix(s: &str, radix: uint) -> Option<BigUint> {
+        let data = Mpz::from_str_radix(s, radix);
+        match data {
+            Some(data) => Some(BigUint{ data: data }),
+            None       => None
+        }
+    }
+
     pub fn is_odd(&self) -> bool {
         self.data.tstbit(0)
     }
@@ -34,6 +42,11 @@ impl BigUint {
 
     pub fn bits(&self) -> uint {
         self.data.bit_length()
+    }
+
+    /// Implements self mod other.
+    pub fn modulus(&self, other: &BigUint) -> BigUint {
+        BigUint{ data: self.data.modulus(&other.data) }
     }
 }
 
@@ -156,6 +169,105 @@ impl Shr<uint, BigUint> for BigUint {
     }
 }
 
+#[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
+pub struct BigInt {
+    data: Mpz
+}
+
+impl BigInt {
+    /// Implements self mod other.
+    pub fn modulus(&self, other: &BigUint) -> BigUint {
+        BigUint{ data: self.data.modulus(&other.data) }
+    }
+}
+
+
+impl One for BigInt {
+    fn one() -> BigInt {
+        BigInt{ data: One::one() }
+    }
+}
+
+impl FromPrimitive for BigInt {
+    fn from_u64(other: u64) -> Option<BigInt> {
+        let mpz: Option<Mpz> = FromPrimitive::from_u64(other);
+        match mpz {
+            Some(mpz) => Some(BigInt{ data: mpz }),
+            None      => None
+        }
+    }
+
+    fn from_i64(other: i64) -> Option<BigInt> {
+        let mpz: Option<Mpz> = FromPrimitive::from_i64(other);
+        match mpz {
+            Some(mpz) => Some(BigInt{ data: mpz }),
+            None      => None
+        }
+    }
+}
+
+impl ToStrRadix for BigInt {
+    fn to_str_radix(&self, radix: uint) -> ~str {
+        self.data.to_str_radix(radix)
+    }
+}
+
+impl fmt::Show for BigInt {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f.buf, "{}", self.to_str_radix(10))
+    }
+}
+
+impl Add<BigInt, BigInt> for BigInt {
+    fn add(&self, other: &BigInt) -> BigInt {
+        BigInt{ data: self.data.add(&other.data) }
+    }
+}
+
+impl Sub<BigInt, BigInt> for BigInt {
+    fn sub(&self, other: &BigInt) -> BigInt {
+        BigInt{ data: self.data.sub(&other.data) }
+    }
+}
+
+impl Mul<BigInt, BigInt> for BigInt {
+    fn mul(&self, other: &BigInt) -> BigInt {
+        BigInt{ data: self.data.mul(&other.data) }
+    }
+}
+
+impl Div<BigInt, BigInt> for BigInt {
+    fn div(&self, other: &BigInt) -> BigInt {
+        BigInt{ data: self.data.div(&other.data) }
+    }
+}
+
+impl Rem<BigInt, BigInt> for BigInt {
+    fn rem(&self, other: &BigInt) -> BigInt {
+        BigInt{ data: self.data.rem(&other.data) }
+    }
+}
+
+impl ToBigUint for BigInt {
+    fn to_biguint(&self) -> Option<BigUint> {
+        if *self >= Zero::zero() {
+            Some(BigUint{ data: self.data.clone() })
+        } else {
+            None
+        }
+    }
+}
+
+pub trait ToBigInt {
+    fn to_bigint(&self) -> Option<BigInt>;
+}
+
+impl ToBigInt for BigUint {
+    fn to_bigint(&self) -> Option<BigInt> {
+       Some(BigInt{ data: self.data.clone() }) 
+    }
+}
+
 pub trait RandBigInt {
     /// Generate a random `BigUint` of the given bit size.
     fn gen_biguint(&mut self, bit_size: uint) -> BigUint;
@@ -207,8 +319,8 @@ impl<R: Rng> RandBigInt for R {
 }
 
 #[cfg(test)]
-mod test {
-    use super::{BigUint, RandBigInt, ToBigUint};
+mod test_biguint {
+    use super::{BigUint, RandBigInt, ToBigUint, ToBigInt};
     use std::{u32,u64};
     use std::from_str::FromStr;
     use std::num::{Zero, One};
@@ -234,9 +346,22 @@ mod test {
     }
 
     #[test]
+    fn test_from_str_radix() {
+        let two = BigUint::from_str_radix("1a", 16).unwrap();
+        assert_eq!(two.to_str(), ~"26");
+    }
+
+    #[test]
     fn test_to_biguint() {
         let three = 3u.to_biguint().unwrap();
         assert_eq!(three.to_str(), ~"3");
+    }
+
+    #[test]
+    fn test_to_bigint() {
+        let three = 3u.to_biguint().unwrap();
+        let four = 4u.to_biguint().unwrap();
+        assert!(three.to_bigint().unwrap() - four.to_bigint().unwrap() < Zero::zero())
     }
 
     #[test]
@@ -371,6 +496,14 @@ mod test {
     }
 
     #[test]
+    fn test_modulus() {
+        let two: BigUint = FromPrimitive::from_uint(2).unwrap();
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(two.modulus(&three), two);
+    }
+
+    #[test]
     fn test_rand_gen_biguint() {
         let mut rng = task_rng();
         let rand1 = rng.gen_biguint(128);
@@ -396,4 +529,83 @@ mod test {
         let rand2 = rng.gen_biguint_range(&min, &max);
         assert!(rand1.to_str() != rand2.to_str());
     }
+}
+
+#[cfg(test)]
+mod test_bigint {
+    use super::{BigInt, BigUint, ToBigUint};
+    use std::num::{Zero, One};
+
+    #[test]
+    fn test_zero_and_one() {
+        let zero: BigInt = Zero::zero();
+        let one: BigInt = One::one();
+        assert_eq!(zero.to_str(), ~"0");
+        assert_eq!(one.to_str(), ~"1");
+    }
+
+    #[test]
+    fn test_to_biguint() {
+        let three: BigInt = FromPrimitive::from_int(3).unwrap();
+        let minusthree: BigInt = FromPrimitive::from_int(-3).unwrap();
+        assert_eq!(three.to_biguint().unwrap().to_str(), ~"3");
+        assert_eq!(minusthree.to_biguint(), None);
+    }
+
+    #[test]
+    fn test_add() {
+        let two: BigInt = FromPrimitive::from_uint(2).unwrap();
+        let three: BigInt = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(two.add(&three).to_str(), ~"5");
+        assert_eq!((two + three).to_str(), ~"5");
+    }
+
+    #[test]
+    fn test_simple_sub() {
+        let two: BigInt = FromPrimitive::from_uint(2).unwrap();
+        let three: BigInt = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(three.sub(&two).to_str(), ~"1");
+        assert_eq!((three - two).to_str(), ~"1");
+    }
+
+    #[test]
+    fn test_mul() {
+        let two: BigInt = FromPrimitive::from_uint(2).unwrap();
+        let three: BigInt = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(two.mul(&three).to_str(), ~"6");
+        assert_eq!((two * three).to_str(), ~"6");
+    }
+
+    #[test]
+    fn test_div() {
+        let one: BigInt = FromPrimitive::from_uint(1).unwrap();
+        let two: BigInt = FromPrimitive::from_uint(2).unwrap();
+
+        assert_eq!(two / two, one);
+        assert_eq!(two.div(&two), one);
+    }
+
+    #[test]
+    fn test_rem() {
+        let one: BigInt = FromPrimitive::from_uint(1).unwrap();
+        let two: BigInt = FromPrimitive::from_uint(2).unwrap();
+        let three: BigInt = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(three % two, one);
+        assert_eq!(three.rem(&two), one);
+    }
+
+    #[test]
+    fn test_modulus() {
+        let minusone: BigInt = FromPrimitive::from_int(-1).unwrap();
+        let two: BigInt = FromPrimitive::from_uint(2).unwrap();
+        let three: BigUint = FromPrimitive::from_uint(3).unwrap();
+
+        assert_eq!(two.modulus(&three), two.to_biguint().unwrap());
+        assert_eq!(minusone.modulus(&three), two.to_biguint().unwrap());
+    }
+
 }

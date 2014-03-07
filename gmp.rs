@@ -240,6 +240,14 @@ impl Mpz {
         }
     }
 
+    pub fn modulus(&self, modulo: &Mpz) -> Mpz {
+        unsafe {
+            let mut res = Mpz::new();
+            __gmpz_mod(&mut res.mpz, &self.mpz, &modulo.mpz);
+            res
+        }
+    }
+
     // TODO: handle a zero modulo
     pub fn invert(&self, modulo: &Mpz) -> Option<Mpz> {
         unsafe {
@@ -1211,6 +1219,15 @@ mod test_mpz {
         assert!(two.divides(&six));
         assert!(three.divides(&six));
         assert!(!two.divides(&three));
+    }
+
+    #[test]
+    fn test_modulus() {
+        let minusone: Mpz = FromPrimitive::from_int(-1).unwrap();
+        let two: Mpz = FromPrimitive::from_int(2).unwrap();
+        let three: Mpz = FromPrimitive::from_int(3).unwrap();
+        assert_eq!(two.modulus(&three), two);
+        assert_eq!(minusone.modulus(&three), two);
     }
 
     #[test]

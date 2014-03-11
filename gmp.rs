@@ -71,6 +71,8 @@ extern "C" {
     fn __gmpz_abs(rop: mpz_ptr, op: mpz_srcptr);
     fn __gmpz_tdiv_q(q: mpz_ptr, n: mpz_srcptr, d: mpz_srcptr);
     fn __gmpz_tdiv_r(r: mpz_ptr, n: mpz_srcptr, d: mpz_srcptr);
+    fn __gmpz_fdiv_q(q: mpz_ptr, n: mpz_srcptr, d: mpz_srcptr);
+    fn __gmpz_fdiv_r(r: mpz_ptr, n: mpz_srcptr, d: mpz_srcptr);
     fn __gmpz_fdiv_q_2exp(q: mpz_ptr, n: mpz_srcptr, b: mp_bitcnt_t);
     fn __gmpz_mod(r: mpz_ptr, n: mpz_srcptr, d: mpz_srcptr);
     fn __gmpz_divisible_p(n: mpz_srcptr, d: mpz_srcptr) -> c_int;
@@ -216,6 +218,22 @@ impl Mpz {
             __gmpz_abs(&mut res.mpz, &self.mpz);
             res
         }
+    }
+
+    pub fn div_floor(&self, other: &Mpz) -> Mpz {
+      unsafe {
+        let mut res = Mpz::new();
+        __gmpz_fdiv_q(&mut res.mpz, &self.mpz, &other.mpz);
+        res
+      }
+    }
+
+    pub fn mod_floor(&self, other: &Mpz) -> Mpz {
+      unsafe {
+        let mut res = Mpz::new();
+        __gmpz_fdiv_r(&mut res.mpz, &self.mpz, &other.mpz);
+        res
+      }
     }
 
     pub fn gcd(&self, other: &Mpz) -> Mpz {
@@ -1114,6 +1132,35 @@ mod test_mpz {
         assert!(x == -y);
         assert!(x == y.abs());
         assert!(x.abs() == y.abs());
+    }
+
+    #[test]
+    fn test_div_floor() {
+        let two: Mpz = FromPrimitive::from_int(2).unwrap();
+        let eight: Mpz = FromPrimitive::from_int(8).unwrap();
+        let minuseight: Mpz = FromPrimitive::from_int(-8).unwrap();
+        let three: Mpz = FromPrimitive::from_int(3).unwrap();
+        let minusthree: Mpz = FromPrimitive::from_int(-3).unwrap();
+        assert_eq!(eight.div_floor(&three), two);
+        assert_eq!(eight.div_floor(&minusthree), minusthree);
+        assert_eq!(minuseight.div_floor(&three), minusthree);
+        assert_eq!(minuseight.div_floor(&minusthree), two);
+    }
+
+    #[test]
+    fn test_mod_floor() {
+        let one: Mpz = FromPrimitive::from_int(1).unwrap();
+        let minusone: Mpz = FromPrimitive::from_int(-1).unwrap();
+        let two: Mpz = FromPrimitive::from_int(2).unwrap();
+        let minustwo: Mpz = FromPrimitive::from_int(-2).unwrap();
+        let three: Mpz = FromPrimitive::from_int(3).unwrap();
+        let minusthree: Mpz = FromPrimitive::from_int(-3).unwrap();
+        let eight: Mpz = FromPrimitive::from_int(8).unwrap();
+        let minuseight: Mpz = FromPrimitive::from_int(-8).unwrap();
+        assert_eq!(eight.mod_floor(&three), two);
+        assert_eq!(eight.mod_floor(&minusthree), minusone);
+        assert_eq!(minuseight.mod_floor(&three), one);
+        assert_eq!(minuseight.mod_floor(&minusthree), minustwo);
     }
 
     #[test]

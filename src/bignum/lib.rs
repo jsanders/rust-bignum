@@ -6,6 +6,7 @@
 #[feature(macro_rules)];
 
 extern crate gmp;
+extern crate num;
 
 use gmp::{Mpz, RandState};
 use std::fmt;
@@ -13,6 +14,7 @@ use std::from_str::FromStr;
 use std::num::{One, Zero, ToStrRadix};
 use std::rand::Rng;
 use std::libc::c_ulong;
+use num::Integer;
 
 #[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
 pub struct BigUint {
@@ -26,18 +28,6 @@ impl BigUint {
             Some(data) => Some(BigUint{ data: data }),
             None       => None
         }
-    }
-
-    pub fn is_odd(&self) -> bool {
-        self.data.tstbit(0)
-    }
-
-    pub fn is_even(&self) -> bool {
-        !self.is_odd()
-    }
-
-    pub fn divides(&self, other: &BigUint) -> bool {
-        self.data.divides(&other.data)
     }
 
     pub fn bits(&self) -> uint {
@@ -166,6 +156,42 @@ impl Shr<uint, BigUint> for BigUint {
     fn shr(&self, rhs: &uint) -> BigUint {
         let shift = *rhs as c_ulong;
         BigUint{ data: self.data.shr(&shift) }
+    }
+}
+
+impl Neg<BigUint> for BigUint {
+    fn neg(&self) -> BigUint { fail!() }
+}
+
+impl Num for BigUint {}
+
+impl Integer for BigUint {
+    fn div_floor(&self, other: &BigUint) -> BigUint {
+        BigUint { data: self.data.div_floor(&other.data) }
+    }
+
+    fn mod_floor(&self, other: &BigUint) -> BigUint {
+        BigUint { data: self.data.mod_floor(&other.data)  }
+    }
+
+    fn gcd(&self, other: &BigUint) -> BigUint {
+        BigUint { data: self.data.gcd(&other.data) }
+    }
+
+    fn lcm(&self, other: &BigUint) -> BigUint {
+        BigUint { data: self.data.lcm(&other.data) }
+    }
+
+    fn divides(&self, other: &BigUint) -> bool {
+        self.data.divides(&other.data)
+    }
+
+    fn is_odd(&self) -> bool {
+        self.data.tstbit(0)
+    }
+
+    fn is_even(&self) -> bool {
+        !self.is_odd()
     }
 }
 
@@ -321,6 +347,7 @@ impl<R: Rng> RandBigInt for R {
 #[cfg(test)]
 mod test_biguint {
     use super::{BigUint, RandBigInt, ToBigUint, ToBigInt};
+    use num::Integer;
     use std::{u32,u64};
     use std::from_str::FromStr;
     use std::num::{Zero, One};

@@ -7,13 +7,14 @@
 
 extern crate gmp;
 extern crate num;
+extern crate rand;
 
 use gmp::{Mpz, RandState};
 use std::fmt;
 use std::from_str::FromStr;
 use std::num::{One, Zero, ToStrRadix};
-use std::rand::Rng;
 use std::libc::c_ulong;
+use rand::Rng;
 use num::Integer;
 
 #[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
@@ -351,7 +352,7 @@ mod test_biguint {
     use std::{u32,u64};
     use std::from_str::FromStr;
     use std::num::{Zero, One};
-    use std::rand::task_rng;
+    use rand::task_rng;
 
     #[test]
     fn test_clone() {

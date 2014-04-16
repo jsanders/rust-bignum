@@ -1,4 +1,4 @@
-#[crate_id = "gmp#0.1.0"];
+#[crate_id = "gmp#0.1.1"];
 
 #[comment = "gmp bindings"];
 #[license = "MIT"];
@@ -7,10 +7,12 @@
 #[feature(globs)];
 #[allow(non_camel_case_types)];
 
-use std::libc::{c_char, c_double, c_int, c_long, c_ulong, c_void, size_t};
+extern crate libc;
+
+use libc::{c_char, c_double, c_int, c_long, c_ulong, c_void, size_t};
 use std::num::{One, Zero, ToStrRadix};
 use std::mem::{uninit,size_of};
-use std::{cmp, vec, fmt};
+use std::{cmp, fmt, slice};
 use std::from_str::FromStr;
 
 struct mpz_struct {
@@ -142,7 +144,7 @@ extern "C" {
 }
 
 pub struct Mpz {
-    priv mpz: mpz_struct,
+    mpz: mpz_struct,
 }
 
 impl Drop for Mpz {
@@ -313,18 +315,14 @@ impl Clone for Mpz {
     }
 }
 
-impl TotalEq for Mpz {
-    fn equals(&self, other: &Mpz) -> bool {
+impl Eq for Mpz {
+    fn eq(&self, other: &Mpz) -> bool {
         let cmp = unsafe { __gmpz_cmp(&self.mpz, &other.mpz) };
         cmp == 0
     }
 }
 
-impl Eq for Mpz {
-    fn eq(&self, other: &Mpz) -> bool {
-        self.equals(other)
-    }
-}
+impl TotalEq for Mpz { }
 
 impl TotalOrd for Mpz {
     fn cmp(&self, other: &Mpz) -> Ordering {
@@ -377,7 +375,7 @@ impl Mul<Mpz, Mpz> for Mpz {
 impl Div<Mpz, Mpz> for Mpz {
     fn div(&self, other: &Mpz) -> Mpz {
         unsafe {
-            if self.is_zero() {
+            if other.is_zero() {
                 fail!(~"divide by zero")
             }
 
@@ -391,7 +389,7 @@ impl Div<Mpz, Mpz> for Mpz {
 impl Rem<Mpz, Mpz> for Mpz {
     fn rem(&self, other: &Mpz) -> Mpz {
         unsafe {
-            if self.is_zero() {
+            if other.is_zero() {
                 fail!(~"divide by zero")
             }
 
@@ -524,7 +522,7 @@ impl ToStrRadix for Mpz {
             let len = __gmpz_sizeinbase(&self.mpz, base as c_int) as uint + 2;
 
             // Allocate and write into a raw *c_char of the correct length
-            let mut vector: ~[u8] = vec::with_capacity(len);
+            let mut vector: ~[u8] = slice::with_capacity(len);
             vector.set_len(len);
 
             let mut cstr = vector.to_c_str_unchecked();
@@ -548,7 +546,7 @@ impl fmt::Show for Mpz {
 
 
 pub struct RandState {
-    priv state: gmp_randstate_struct,
+    state: gmp_randstate_struct,
 }
 
 impl Drop for RandState {
@@ -628,7 +626,7 @@ impl Clone for RandState {
 }
 
 pub struct Mpq {
-    priv mpq: mpq_struct,
+    mpq: mpq_struct,
 }
 
 impl Drop for Mpq {
@@ -821,7 +819,7 @@ impl Zero for Mpq {
 }
 
 pub struct Mpf {
-    priv mpf: mpf_struct,
+    mpf: mpf_struct,
 }
 
 impl Drop for Mpf {
@@ -988,8 +986,8 @@ mod test_mpz {
     use super::*;
     use std::from_str::FromStr;
     use std::num::ToStrRadix;
-    use std::num::One;
-    use std::libc::c_ulong;
+    use std::num::{Zero, One};
+    use libc::c_ulong;
 
     #[test]
     fn test_set() {
@@ -1060,17 +1058,33 @@ mod test_mpz {
     }
 
     #[test]
+    fn test_div_zero_numer() {
+        let x: Mpz = FromPrimitive::from_int(2).unwrap();
+        let zero: Mpz = Zero::zero();
+        assert_eq!(zero / x, zero);
+    }
+
+    #[test]
     #[should_fail]
-    fn test_div_zero() {
-        let x = Mpz::new();
-        x / x;
+    fn test_div_zero_denom() {
+        let x: Mpz = FromPrimitive::from_int(2).unwrap();
+        let zero: Mpz = Zero::zero();
+        x / zero;
+    }
+
+    #[test]
+    fn test_rem_zero_numer() {
+        let x: Mpz = FromPrimitive::from_int(2).unwrap();
+        let zero: Mpz = Zero::zero();
+        assert_eq!(zero % x, zero);
     }
 
     #[test]
     #[should_fail]
     fn test_rem_zero() {
-        let x = Mpz::new();
-        x % x;
+        let x: Mpz = FromPrimitive::from_int(2).unwrap();
+        let zero: Mpz = Zero::zero();
+        x % zero;
     }
 
     #[test]

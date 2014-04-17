@@ -1,10 +1,11 @@
-#[crate_id = "bignum#0.1.0-pre"];
+#[crate_id = "bignum#0.1.1-pre"];
 
 #[comment = "Bignum library for Rust"];
 #[crate_type = "rlib"];
 
 #[feature(macro_rules)];
 
+extern crate libc;
 extern crate gmp;
 extern crate num;
 extern crate rand;
@@ -13,7 +14,7 @@ use gmp::{Mpz, RandState};
 use std::fmt;
 use std::from_str::FromStr;
 use std::num::{One, Zero, ToStrRadix};
-use std::libc::c_ulong;
+use libc::c_ulong;
 use rand::Rng;
 use num::Integer;
 

@@ -12,7 +12,7 @@ extern crate libc;
 use libc::{c_char, c_double, c_int, c_long, c_ulong, c_void, size_t};
 use std::num::{One, Zero, ToStrRadix};
 use std::mem::{uninit,size_of};
-use std::{cmp, fmt, slice};
+use std::{cmp, fmt};
 use std::from_str::FromStr;
 
 struct mpz_struct {

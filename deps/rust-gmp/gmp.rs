@@ -1,11 +1,11 @@
-#[crate_id = "gmp#0.1.1"];
+#![crate_id = "gmp#0.1.1"]
 
-#[comment = "gmp bindings"];
-#[license = "MIT"];
-#[crate_type = "lib"];
+#![comment = "gmp bindings"]
+#![license = "MIT"]
+#![crate_type = "lib"]
 
-#[feature(globs)];
-#[allow(non_camel_case_types)];
+#![feature(globs)]
+#![allow(non_camel_case_types)]
 
 extern crate libc;
 

@@ -522,10 +522,10 @@ impl ToStrRadix for Mpz {
             let len = __gmpz_sizeinbase(&self.mpz, base as c_int) as uint + 2;
 
             // Allocate and write into a raw *c_char of the correct length
-            let mut vector: ~[u8] = slice::with_capacity(len);
+            let mut vector: Vec<u8> = Vec::with_capacity(len);
             vector.set_len(len);
 
-            let mut cstr = vector.to_c_str_unchecked();
+            let mut cstr = vector.as_slice().to_c_str_unchecked();
             cstr.with_mut_ref(|raw| -> () {
                 __gmpz_get_str(raw, base as c_int, &self.mpz);
             });

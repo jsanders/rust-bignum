@@ -376,7 +376,7 @@ impl Div<Mpz, Mpz> for Mpz {
     fn div(&self, other: &Mpz) -> Mpz {
         unsafe {
             if other.is_zero() {
-                fail!("divide by zero".to_owned())
+                fail!("divide by zero")
             }
 
             let mut res = Mpz::new();
@@ -390,7 +390,7 @@ impl Rem<Mpz, Mpz> for Mpz {
     fn rem(&self, other: &Mpz) -> Mpz {
         unsafe {
             if other.is_zero() {
-                fail!("divide by zero".to_owned())
+                fail!("divide by zero")
             }
 
             let mut res = Mpz::new();
@@ -412,10 +412,10 @@ impl Neg<Mpz> for Mpz {
 
 impl ToPrimitive for Mpz {
     fn to_i64(&self) -> Option<i64> {
-        fail!("not implemented".to_owned())
+        fail!("not implemented")
     }
     fn to_u64(&self) -> Option<u64> {
-        fail!("not implemented".to_owned())
+        fail!("not implemented")
     }
 }
 
@@ -685,7 +685,7 @@ impl Mpq {
     pub fn invert(&self) -> Mpq {
         unsafe {
             if self.is_zero() {
-                fail!("divide by zero".to_owned())
+                fail!("divide by zero")
             }
 
             let mut res = Mpq::new();
@@ -761,7 +761,7 @@ impl Div<Mpq, Mpq> for Mpq {
     fn div(&self, other: &Mpq) -> Mpq {
         unsafe {
             if self.is_zero() {
-                fail!("divide by zero".to_owned())
+                fail!("divide by zero")
             }
 
             let mut res = Mpq::new();
@@ -783,10 +783,10 @@ impl Neg<Mpq> for Mpq {
 
 impl ToPrimitive for Mpq {
     fn to_i64(&self) -> Option<i64> {
-        fail!("not implemented".to_owned())
+        fail!("not implemented")
     }
     fn to_u64(&self) -> Option<u64> {
-        fail!("not implemented".to_owned())
+        fail!("not implemented")
     }
 }
 
@@ -960,7 +960,7 @@ impl Div<Mpf, Mpf> for Mpf {
     fn div(&self, other: &Mpf) -> Mpf {
         unsafe {
             if __gmpf_cmp_ui(&self.mpf, 0) == 0 {
-                fail!("divide by zero".to_owned())
+                fail!("divide by zero")
             }
 
             let mut res = Mpf::new(cmp::max(self.get_prec() as uint,
@@ -1107,13 +1107,13 @@ mod test_mpz {
     #[test]
     fn test_to_str_radix() {
         let x: Mpz = FromPrimitive::from_int(255).unwrap();
-        assert!(x.to_str_radix(16) == "ff".to_owned());
+        assert!(x.to_str_radix(16).as_slice() == "ff");
     }
 
     #[test]
     fn test_to_str() {
         let x: Mpz = FromStr::from_str("1234567890").unwrap();
-        assert!(x.to_str() == "1234567890".to_owned());
+        assert!(x.to_str().as_slice() == "1234567890");
     }
 
     #[test]
@@ -1134,7 +1134,7 @@ mod test_mpz {
     #[test]
     fn test_from_int() {
         let x: Mpz = FromPrimitive::from_int(150).unwrap();
-        assert!(x.to_str() == "150".to_owned());
+        assert!(x.to_str().as_slice() == "150");
         assert!(x == FromStr::from_str("150").unwrap());
     }
 

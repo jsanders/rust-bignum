@@ -18,7 +18,7 @@ use libc::c_ulong;
 use rand::Rng;
 use num::Integer;
 
-#[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
+#[deriving(Clone, PartialEq, Eq, PartialOrd, Ord, Zero)]
 pub struct BigUint {
     data: Mpz
 }
@@ -197,7 +197,7 @@ impl Integer for BigUint {
     }
 }
 
-#[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
+#[deriving(Clone, PartialEq, Eq, PartialOrd, Ord, Zero)]
 pub struct BigInt {
     data: Mpz
 }

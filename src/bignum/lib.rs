@@ -18,7 +18,7 @@ use libc::c_ulong;
 use rand::Rng;
 use num::Integer;
 
-#[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
+#[deriving(Clone, PartialEq, Eq, PartialOrd, Ord, Zero)]
 pub struct BigUint {
     data: Mpz
 }
@@ -107,14 +107,14 @@ impl FromStr for BigUint {
 }
 
 impl ToStrRadix for BigUint {
-    fn to_str_radix(&self, radix: uint) -> ~str {
+    fn to_str_radix(&self, radix: uint) -> String {
         self.data.to_str_radix(radix)
     }
 }
 
 impl fmt::Show for BigUint {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f.buf, "{}", self.to_str_radix(10))
+        write!(f, "{}", self.to_str_radix(10))
     }
 }
 
@@ -197,7 +197,7 @@ impl Integer for BigUint {
     }
 }
 
-#[deriving(Clone, Eq, Ord, TotalEq, TotalOrd, Zero)]
+#[deriving(Clone, PartialEq, Eq, PartialOrd, Ord, Zero)]
 pub struct BigInt {
     data: Mpz
 }
@@ -235,14 +235,14 @@ impl FromPrimitive for BigInt {
 }
 
 impl ToStrRadix for BigInt {
-    fn to_str_radix(&self, radix: uint) -> ~str {
+    fn to_str_radix(&self, radix: uint) -> String {
         self.data.to_str_radix(radix)
     }
 }
 
 impl fmt::Show for BigInt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f.buf, "{}", self.to_str_radix(10))
+        write!(f, "{}", self.to_str_radix(10))
     }
 }
 
@@ -353,7 +353,7 @@ mod test_biguint {
     use std::{u32,u64};
     use std::from_str::FromStr;
     use std::num::{Zero, One};
-    use rand::task_rng;
+    use std::rand::task_rng;
 
     #[test]
     fn test_clone() {

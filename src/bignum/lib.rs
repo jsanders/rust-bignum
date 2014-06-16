@@ -353,7 +353,7 @@ mod test_biguint {
     use std::{u32,u64};
     use std::from_str::FromStr;
     use std::num::{Zero, One};
-    use rand::task_rng;
+    use std::rand::task_rng;
 
     #[test]
     fn test_clone() {

@@ -11,7 +11,7 @@ extern crate libc;
 
 use libc::{c_char, c_double, c_int, c_long, c_ulong, c_void, size_t};
 use std::num::{One, Zero, ToStrRadix};
-use std::mem::{uninit,size_of};
+use std::mem::{uninitialized, size_of};
 use std::{cmp, fmt};
 use std::from_str::FromStr;
 
@@ -154,7 +154,7 @@ impl Drop for Mpz {
 impl Mpz {
     pub fn new() -> Mpz {
         unsafe {
-            let mut mpz = uninit();
+            let mut mpz = uninitialized();
             __gmpz_init(&mut mpz);
             Mpz { mpz: mpz }
         }
@@ -162,7 +162,7 @@ impl Mpz {
 
     pub fn new_reserve(n: c_ulong) -> Mpz {
         unsafe {
-            let mut mpz = uninit();
+            let mut mpz = uninitialized();
             __gmpz_init2(&mut mpz, n);
             Mpz { mpz: mpz }
         }
@@ -177,7 +177,7 @@ impl Mpz {
     pub fn from_str_radix(s: &str, base: uint) -> Option<Mpz> {
         unsafe {
             assert!(base == 0 || (base >= 2 && base <= 62));
-            let mut mpz = uninit();
+            let mut mpz = uninitialized();
             let r = s.with_c_str(|s| {
                 __gmpz_init_set_str(&mut mpz, s, base as c_int)
             });
@@ -308,7 +308,7 @@ impl Mpz {
 impl Clone for Mpz {
     fn clone(&self) -> Mpz {
         unsafe {
-            let mut mpz = uninit();
+            let mut mpz = uninitialized();
             __gmpz_init_set(&mut mpz, &self.mpz);
             Mpz { mpz: mpz }
         }
@@ -444,7 +444,7 @@ impl FromPrimitive for Mpz {
 impl One for Mpz {
     fn one() -> Mpz {
         unsafe {
-            let mut mpz = uninit();
+            let mut mpz = uninitialized();
             __gmpz_init_set_ui(&mut mpz, 1);
             Mpz { mpz: mpz }
         }
@@ -558,7 +558,7 @@ impl Drop for RandState {
 impl RandState {
     pub fn new() -> RandState {
         unsafe {
-            let mut state: gmp_randstate_struct = uninit();
+            let mut state: gmp_randstate_struct = uninitialized();
             __gmp_randinit_default(&mut state);
             RandState { state: state }
         }
@@ -566,7 +566,7 @@ impl RandState {
 
     pub fn new_mt() -> RandState {
         unsafe {
-            let mut state: gmp_randstate_struct = uninit();
+            let mut state: gmp_randstate_struct = uninitialized();
             __gmp_randinit_mt(&mut state);
             RandState { state: state }
         }
@@ -574,7 +574,7 @@ impl RandState {
 
     pub fn new_lc_2exp(a: Mpz, c: c_ulong, m2exp: c_ulong) -> RandState {
         unsafe {
-            let mut state: gmp_randstate_struct = uninit();
+            let mut state: gmp_randstate_struct = uninitialized();
             __gmp_randinit_lc_2exp(&mut state, &a.mpz, c, m2exp);
             RandState { state: state }
         }
@@ -582,7 +582,7 @@ impl RandState {
 
     pub fn new_lc_2exp_size(size: c_ulong) -> RandState {
         unsafe {
-            let mut state: gmp_randstate_struct = uninit();
+            let mut state: gmp_randstate_struct = uninitialized();
             __gmp_randinit_lc_2exp_size(&mut state, size);
             RandState { state: state }
         }
@@ -618,7 +618,7 @@ impl RandState {
 impl Clone for RandState {
     fn clone(&self) -> RandState {
         unsafe {
-            let mut state: gmp_randstate_struct = uninit();
+            let mut state: gmp_randstate_struct = uninitialized();
             __gmp_randinit_set(&mut state, &self.state);
             RandState { state: state }
         }
@@ -636,7 +636,7 @@ impl Drop for Mpq {
 impl Mpq {
     pub fn new() -> Mpq {
         unsafe {
-            let mut mpq = uninit();
+            let mut mpq = uninitialized();
             __gmpq_init(&mut mpq);
             Mpq { mpq: mpq }
         }
@@ -829,7 +829,7 @@ impl Drop for Mpf {
 impl Mpf {
     pub fn new(precision: c_ulong) -> Mpf {
         unsafe {
-            let mut mpf = uninit();
+            let mut mpf = uninitialized();
             __gmpf_init2(&mut mpf, precision);
             Mpf { mpf: mpf }
         }
@@ -892,7 +892,7 @@ impl Mpf {
 impl Clone for Mpf {
     fn clone(&self) -> Mpf {
         unsafe {
-            let mut mpf = uninit();
+            let mut mpf = uninitialized();
             __gmpf_init_set(&mut mpf, &self.mpf);
             Mpf { mpf: mpf }
         }

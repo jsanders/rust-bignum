@@ -114,7 +114,7 @@ impl ToStrRadix for BigUint {
 
 impl fmt::Show for BigUint {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f.buf, "{}", self.to_str_radix(10))
+        write!(f, "{}", self.to_str_radix(10))
     }
 }
 
@@ -242,7 +242,7 @@ impl ToStrRadix for BigInt {
 
 impl fmt::Show for BigInt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f.buf, "{}", self.to_str_radix(10))
+        write!(f, "{}", self.to_str_radix(10))
     }
 }
 

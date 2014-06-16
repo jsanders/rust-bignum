@@ -107,7 +107,7 @@ impl FromStr for BigUint {
 }
 
 impl ToStrRadix for BigUint {
-    fn to_str_radix(&self, radix: uint) -> ~str {
+    fn to_str_radix(&self, radix: uint) -> String {
         self.data.to_str_radix(radix)
     }
 }
@@ -235,7 +235,7 @@ impl FromPrimitive for BigInt {
 }
 
 impl ToStrRadix for BigInt {
-    fn to_str_radix(&self, radix: uint) -> ~str {
+    fn to_str_radix(&self, radix: uint) -> String {
         self.data.to_str_radix(radix)
     }
 }

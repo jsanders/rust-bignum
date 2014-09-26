@@ -9,3 +9,6 @@ path = "src/bignum/lib.rs"
 
 [dependencies.rust-gmp]
 path = "deps/rust-gmp"
+
+[dependencies.num]
+git = "https://github.com/rust-lang/num"

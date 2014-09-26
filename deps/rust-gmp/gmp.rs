@@ -15,12 +15,14 @@ use std::mem::{uninitialized, size_of};
 use std::{cmp, fmt};
 use std::from_str::FromStr;
 
+#[repr(C)]
 struct mpz_struct {
     _mp_alloc: c_int,
     _mp_size: c_int,
     _mp_d: *mut c_void
 }
 
+#[repr(C)]
 struct mpq_struct {
     _mp_num: mpz_struct,
     _mp_den: mpz_struct
@@ -28,6 +30,7 @@ struct mpq_struct {
 
 type mp_exp_t = c_long;
 
+#[repr(C)]
 struct mpf_struct {
     _mp_prec: c_int,
     _mp_size: c_int,
@@ -35,6 +38,7 @@ struct mpf_struct {
     _mp_d: *mut c_void
 }
 
+#[repr(C)]
 struct gmp_randstate_struct {
     _mp_seed: mpz_struct,
     _mp_alg: c_int,

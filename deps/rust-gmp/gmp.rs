@@ -18,7 +18,7 @@ use std::from_str::FromStr;
 struct mpz_struct {
     _mp_alloc: c_int,
     _mp_size: c_int,
-    _mp_d: *c_void
+    _mp_d: *mut c_void
 }
 
 struct mpq_struct {
@@ -32,21 +32,21 @@ struct mpf_struct {
     _mp_prec: c_int,
     _mp_size: c_int,
     _mp_exp: mp_exp_t,
-    _mp_d: *c_void
+    _mp_d: *mut c_void
 }
 
 struct gmp_randstate_struct {
     _mp_seed: mpz_struct,
     _mp_alg: c_int,
-    _mp_algdata: *c_void
+    _mp_algdata: *mut c_void
 }
 
 type mp_bitcnt_t = c_ulong;
-type mpz_srcptr = *mpz_struct;
+type mpz_srcptr = *const mpz_struct;
 type mpz_ptr = *mut mpz_struct;
-type mpq_srcptr = *mpq_struct;
+type mpq_srcptr = *const mpq_struct;
 type mpq_ptr = *mut mpq_struct;
-type mpf_srcptr = *mpf_struct;
+type mpf_srcptr = *const mpf_struct;
 type mpf_ptr = *mut mpf_struct;
 type gmp_randstate_t = *mut gmp_randstate_struct;
 
@@ -56,12 +56,12 @@ extern "C" {
     fn __gmpz_init2(x: mpz_ptr, n: mp_bitcnt_t);
     fn __gmpz_init_set(rop: mpz_ptr, op: mpz_srcptr);
     fn __gmpz_init_set_ui(rop: mpz_ptr, op: c_ulong);
-    fn __gmpz_init_set_str(rop: mpz_ptr, str: *c_char, base: c_int) -> c_int;
+    fn __gmpz_init_set_str(rop: mpz_ptr, str: *const c_char, base: c_int) -> c_int;
     fn __gmpz_clear(x: mpz_ptr);
     fn __gmpz_realloc2(x: mpz_ptr, n: mp_bitcnt_t);
     fn __gmpz_set(rop: mpz_ptr, op: mpz_srcptr);
-    fn __gmpz_set_str(rop: mpz_ptr, str: *c_char, base: c_int) -> c_int;
-    fn __gmpz_get_str(str: *mut c_char, base: c_int, op: mpz_srcptr) -> *c_char;
+    fn __gmpz_set_str(rop: mpz_ptr, str: *const c_char, base: c_int) -> c_int;
+    fn __gmpz_get_str(str: *mut c_char, base: c_int, op: mpz_srcptr) -> *mut c_char;
     fn __gmpz_sizeinbase(op: mpz_srcptr, base: c_int) -> size_t;
     fn __gmpz_cmp(op1: mpz_srcptr, op2: mpz_srcptr) -> c_int;
     fn __gmpz_cmp_ui(op1: mpz_srcptr, op2: c_ulong) -> c_int;
@@ -92,12 +92,12 @@ extern "C" {
     fn __gmpz_lcm(rop: mpz_ptr, op1: mpz_srcptr, op2: mpz_srcptr);
     fn __gmpz_invert(rop: mpz_ptr, op1: mpz_srcptr, op2: mpz_srcptr) -> c_int;
     fn __gmpz_import(rop: mpz_ptr, count: size_t, order: c_int, size: size_t,
-                     endian: c_int, nails: size_t, op: *c_void);
+                     endian: c_int, nails: size_t, op: *const c_void);
     fn __gmp_randinit_default(state: gmp_randstate_t);
     fn __gmp_randinit_mt(state: gmp_randstate_t);
     fn __gmp_randinit_lc_2exp(state: gmp_randstate_t, a: mpz_srcptr, c: c_ulong, m2exp: mp_bitcnt_t);
     fn __gmp_randinit_lc_2exp_size(state: gmp_randstate_t, size: mp_bitcnt_t);
-    fn __gmp_randinit_set(state: gmp_randstate_t, op: *gmp_randstate_struct);
+    fn __gmp_randinit_set(state: gmp_randstate_t, op: *const gmp_randstate_struct);
     fn __gmp_randclear(state: gmp_randstate_t);
     fn __gmp_randseed(state: gmp_randstate_t, seed: mpz_srcptr);
     fn __gmp_randseed_ui(state: gmp_randstate_t, seed: c_ulong);
@@ -337,8 +337,8 @@ impl Ord for Mpz {
 }
 
 impl PartialOrd for Mpz {
-    fn lt(&self, other: &Mpz) -> bool {
-        self.cmp(other) == Less
+    fn partial_cmp(&self, other: &Mpz) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -424,7 +424,7 @@ impl FromPrimitive for Mpz {
         unsafe {
             let mut res = Mpz::new();
             __gmpz_import(&mut res.mpz, 1, 1, size_of::<u64>() as size_t, 0, 0,
-                          &other as *u64 as *c_void);
+                          &other as *const u64 as *const c_void);
             Some(res)
         }
     }
@@ -432,7 +432,7 @@ impl FromPrimitive for Mpz {
         unsafe {
             let mut res = Mpz::new();
             __gmpz_import(&mut res.mpz, 1, 1, size_of::<i64>() as size_t, 0, 0,
-                          &other.abs() as *i64 as *c_void);
+                          &other.abs() as *const i64 as *const c_void);
             if other.is_negative() {
                 __gmpz_neg(&mut res.mpz, &res.mpz)
             }
@@ -713,17 +713,13 @@ impl cmp::PartialEq for Mpq {
 }
 
 impl cmp::PartialOrd for Mpq {
-    fn lt(&self, other: &Mpq) -> bool {
-        unsafe { __gmpq_cmp(&self.mpq, &other.mpq) < 0 }
-    }
-    fn le(&self, other: &Mpq) -> bool {
-        unsafe { __gmpq_cmp(&self.mpq, &other.mpq) <= 0 }
-    }
-    fn gt(&self, other: &Mpq) -> bool {
-        unsafe { __gmpq_cmp(&self.mpq, &other.mpq) > 0 }
-    }
-    fn ge(&self, other: &Mpq) -> bool {
-        unsafe { __gmpq_cmp(&self.mpq, &other.mpq) >= 0 }
+    fn partial_cmp(&self, other: &Mpq) -> Option<Ordering> {
+        match unsafe { __gmpq_cmp(&self.mpq, &other.mpq) } {
+            0          => Some(Equal),
+            x if x < 0 => Some(Less),
+            x if x > 0 => Some(Greater),
+            _          => None,
+        }
     }
 }
 
@@ -909,17 +905,13 @@ impl cmp::PartialEq for Mpf {
 }
 
 impl cmp::PartialOrd for Mpf {
-    fn lt(&self, other: &Mpf) -> bool {
-        unsafe { __gmpf_cmp(&self.mpf, &other.mpf) < 0 }
-    }
-    fn le(&self, other: &Mpf) -> bool {
-        unsafe { __gmpf_cmp(&self.mpf, &other.mpf) <= 0 }
-    }
-    fn gt(&self, other: &Mpf) -> bool {
-        unsafe { __gmpf_cmp(&self.mpf, &other.mpf) > 0 }
-    }
-    fn ge(&self, other: &Mpf) -> bool {
-        unsafe { __gmpf_cmp(&self.mpf, &other.mpf) >= 0 }
+    fn partial_cmp(&self, other: &Mpf) -> Option<Ordering> {
+        match unsafe { __gmpf_cmp(&self.mpf, &other.mpf) } {
+            0          => Some(Equal),
+            x if x < 0 => Some(Less),
+            x if x > 0 => Some(Greater),
+            _          => None,
+        }
     }
 }
 

@@ -1,0 +1,11 @@
+[root]
+name = "rust-bignum"
+version = "0.0.1"
+dependencies = [
+ "rust-gmp 0.1.1",
+]
+
+[[package]]
+name = "rust-gmp"
+version = "0.1.1"
+

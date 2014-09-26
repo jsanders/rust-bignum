@@ -1088,17 +1088,17 @@ mod test_mpz {
     fn test_div_round() {
         let x: Mpz = FromPrimitive::from_int(2).unwrap();
         let y: Mpz = FromPrimitive::from_int(3).unwrap();
-        assert!((x / y).to_str() == (2i / 3).to_str());
-        assert!((x / -y).to_str() == (2i / -3).to_str());
+        assert!((x / y).to_string() == (2i / 3).to_string());
+        assert!((x / -y).to_string() == (2i / -3).to_string());
     }
 
     #[test]
     fn test_rem() {
         let x: Mpz = FromPrimitive::from_int(20).unwrap();
         let y: Mpz = FromPrimitive::from_int(3).unwrap();
-        assert!((x % y).to_str() == (20i % 3).to_str());
-        assert!((x % -y).to_str() == (20i % -3).to_str());
-        assert!((-x % y).to_str() == (-20i % 3).to_str());
+        assert!((x % y).to_string() == (20i % 3).to_string());
+        assert!((x % -y).to_string() == (20i % -3).to_string());
+        assert!((-x % y).to_string() == (-20i % 3).to_string());
     }
 
     #[test]
@@ -1108,9 +1108,9 @@ mod test_mpz {
     }
 
     #[test]
-    fn test_to_str() {
+    fn test_to_string() {
         let x: Mpz = FromStr::from_str("1234567890").unwrap();
-        assert!(x.to_str().as_slice() == "1234567890");
+        assert!(x.to_string().as_slice() == "1234567890");
     }
 
     #[test]
@@ -1131,7 +1131,7 @@ mod test_mpz {
     #[test]
     fn test_from_int() {
         let x: Mpz = FromPrimitive::from_int(150).unwrap();
-        assert!(x.to_str().as_slice() == "150");
+        assert!(x.to_string().as_slice() == "150");
         assert!(x == FromStr::from_str("150").unwrap());
     }
 
@@ -1208,18 +1208,18 @@ mod test_mpz {
     fn test_shifts() {
         let i = 227;
         let j: Mpz = FromPrimitive::from_int(i).unwrap();
-        assert!((i << 4).to_str() == (j << 4).to_str());
-        assert!((-i << 4).to_str() == (-j << 4).to_str());
-        assert!((i >> 4).to_str() == (j >> 4).to_str());
-        assert!((-i >> 4).to_str() == (-j >> 4).to_str());
+        assert!((i << 4).to_string() == (j << 4).to_string());
+        assert!((-i << 4).to_string() == (-j << 4).to_string());
+        assert!((i >> 4).to_string() == (j >> 4).to_string());
+        assert!((-i >> 4).to_string() == (-j >> 4).to_string());
     }
 
     #[test]
     fn test_compl() {
         let a: Mpz = FromPrimitive::from_int(13).unwrap();
         let b: Mpz = FromPrimitive::from_int(-442).unwrap();
-        assert!(a.compl().to_str() == (!13i).to_str());
-        assert!(b.compl().to_str() == (!-442i).to_str());
+        assert!(a.compl().to_string() == (!13i).to_string());
+        assert!(b.compl().to_string() == (!-442i).to_string());
     }
 
     #[test]

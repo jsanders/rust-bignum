@@ -254,10 +254,15 @@ impl Mpz {
         }
     }
 
-    pub fn divides(&self, other: &Mpz) -> bool {
+    pub fn is_multiple_of(&self, other: &Mpz) -> bool {
         unsafe {
             __gmpz_divisible_p(&other.mpz, &self.mpz) != 0
         }
+    }
+
+    #[inline]
+    pub fn divides(&self, other: &Mpz) -> bool {
+        self.is_multiple_of(other)
     }
 
     pub fn modulus(&self, modulo: &Mpz) -> Mpz {
@@ -1265,13 +1270,13 @@ mod test_mpz {
     }
 
     #[test]
-    fn test_divides() {
+    fn test_is_multiple_of() {
         let two: Mpz = FromPrimitive::from_int(2).unwrap();
         let three: Mpz = FromPrimitive::from_int(3).unwrap();
         let six: Mpz = FromPrimitive::from_int(6).unwrap();
-        assert!(two.divides(&six));
-        assert!(three.divides(&six));
-        assert!(!two.divides(&three));
+        assert!(two.is_multiple_of(&six));
+        assert!(three.is_multiple_of(&six));
+        assert!(!two.is_multiple_of(&three));
     }
 
     #[test]

@@ -184,7 +184,12 @@ impl Integer for BigUint {
         BigUint { data: self.data.lcm(&other.data) }
     }
 
+    #[inline]
     fn divides(&self, other: &BigUint) -> bool {
+        self.is_multiple_of(other)
+    }
+
+    fn is_multiple_of(&self, other: &BigUint) -> bool {
         self.data.divides(&other.data)
     }
 
@@ -359,31 +364,31 @@ mod test_biguint {
     fn test_clone() {
         let two = 2u.to_biguint().unwrap();
         let also_two = two.clone();
-        assert_eq!(two.to_str(), also_two.to_str());
+        assert_eq!(two.to_string(), also_two.to_string());
     }
 
     #[test]
     fn test_from_primitive() {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
-        assert_eq!(two.to_str().as_slice(), "2");
+        assert_eq!(two.to_string().as_slice(), "2");
     }
 
     #[test]
     fn test_from_str() {
         let two: BigUint = FromStr::from_str("2").unwrap();
-        assert_eq!(two.to_str().as_slice(), "2");
+        assert_eq!(two.to_string().as_slice(), "2");
     }
 
     #[test]
     fn test_from_str_radix() {
         let two = BigUint::from_str_radix("1a", 16).unwrap();
-        assert_eq!(two.to_str().as_slice(), "26");
+        assert_eq!(two.to_string().as_slice(), "26");
     }
 
     #[test]
     fn test_to_biguint() {
         let three = 3u.to_biguint().unwrap();
-        assert_eq!(three.to_str().as_slice(), "3");
+        assert_eq!(three.to_string().as_slice(), "3");
     }
 
     #[test]
@@ -411,8 +416,8 @@ mod test_biguint {
     fn test_zero_and_one() {
         let zero: BigUint = Zero::zero();
         let one: BigUint = One::one();
-        assert_eq!(zero.to_str().as_slice(), "0");
-        assert_eq!(one.to_str().as_slice(), "1");
+        assert_eq!(zero.to_string().as_slice(), "0");
+        assert_eq!(one.to_string().as_slice(), "1");
     }
 
     #[test]
@@ -436,8 +441,8 @@ mod test_biguint {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         let three: BigUint = FromPrimitive::from_uint(3).unwrap();
 
-        assert_eq!(two.add(&three).to_str().as_slice(), "5");
-        assert_eq!((two + three).to_str().as_slice(), "5");
+        assert_eq!(two.add(&three).to_string().as_slice(), "5");
+        assert_eq!((two + three).to_string().as_slice(), "5");
     }
 
     #[test]
@@ -445,8 +450,8 @@ mod test_biguint {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         let three: BigUint = FromPrimitive::from_uint(3).unwrap();
 
-        assert_eq!(three.sub(&two).to_str().as_slice(), "1");
-        assert_eq!((three - two).to_str().as_slice(), "1");
+        assert_eq!(three.sub(&two).to_string().as_slice(), "1");
+        assert_eq!((three - two).to_string().as_slice(), "1");
     }
 
     #[test]
@@ -454,8 +459,8 @@ mod test_biguint {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         let three: BigUint = FromPrimitive::from_uint(3).unwrap();
 
-        assert_eq!(two.mul(&three).to_str().as_slice(), "6");
-        assert_eq!((two * three).to_str().as_slice(), "6");
+        assert_eq!(two.mul(&three).to_string().as_slice(), "6");
+        assert_eq!((two * three).to_string().as_slice(), "6");
     }
 
     #[test]
@@ -514,14 +519,14 @@ mod test_biguint {
     }
 
     #[test]
-    fn test_divides() {
+    fn test_is_multiple_of() {
         let two: BigUint = FromPrimitive::from_uint(2).unwrap();
         let three: BigUint = FromPrimitive::from_uint(3).unwrap();
         let six: BigUint = FromPrimitive::from_uint(6).unwrap();
 
-        assert!(two.divides(&six));
-        assert!(three.divides(&six));
-        assert!(!two.divides(&three));
+        assert!(two.is_multiple_of(&six));
+        assert!(three.is_multiple_of(&six));
+        assert!(!two.is_multiple_of(&three));
     }
 
     #[test]
@@ -537,7 +542,7 @@ mod test_biguint {
         let mut rng = task_rng();
         let rand1 = rng.gen_biguint(128);
         let rand2 = rng.gen_biguint(128);
-        assert!(rand1.to_str() != rand2.to_str());
+        assert!(rand1.to_string() != rand2.to_string());
     }
 
     #[test]
@@ -546,7 +551,7 @@ mod test_biguint {
         let max: BigUint = FromPrimitive::from_u64(u64::MAX).unwrap();
         let rand1 = rng.gen_biguint_below(&max);
         let rand2 = rng.gen_biguint_below(&max);
-        assert!(rand1.to_str() != rand2.to_str());
+        assert!(rand1.to_string() != rand2.to_string());
     }
 
     #[test]
@@ -556,7 +561,7 @@ mod test_biguint {
         let max: BigUint = FromPrimitive::from_u64(u64::MAX).unwrap();
         let rand1 = rng.gen_biguint_range(&min, &max);
         let rand2 = rng.gen_biguint_range(&min, &max);
-        assert!(rand1.to_str() != rand2.to_str());
+        assert!(rand1.to_string() != rand2.to_string());
     }
 }
 
@@ -569,15 +574,15 @@ mod test_bigint {
     fn test_zero_and_one() {
         let zero: BigInt = Zero::zero();
         let one: BigInt = One::one();
-        assert_eq!(zero.to_str().as_slice(), "0");
-        assert_eq!(one.to_str().as_slice(), "1");
+        assert_eq!(zero.to_string().as_slice(), "0");
+        assert_eq!(one.to_string().as_slice(), "1");
     }
 
     #[test]
     fn test_to_biguint() {
         let three: BigInt = FromPrimitive::from_int(3).unwrap();
         let minusthree: BigInt = FromPrimitive::from_int(-3).unwrap();
-        assert_eq!(three.to_biguint().unwrap().to_str().as_slice(), "3");
+        assert_eq!(three.to_biguint().unwrap().to_string().as_slice(), "3");
         assert_eq!(minusthree.to_biguint(), None);
     }
 
@@ -586,8 +591,8 @@ mod test_bigint {
         let two: BigInt = FromPrimitive::from_uint(2).unwrap();
         let three: BigInt = FromPrimitive::from_uint(3).unwrap();
 
-        assert_eq!(two.add(&three).to_str().as_slice(), "5");
-        assert_eq!((two + three).to_str().as_slice(), "5");
+        assert_eq!(two.add(&three).to_string().as_slice(), "5");
+        assert_eq!((two + three).to_string().as_slice(), "5");
     }
 
     #[test]
@@ -595,8 +600,8 @@ mod test_bigint {
         let two: BigInt = FromPrimitive::from_uint(2).unwrap();
         let three: BigInt = FromPrimitive::from_uint(3).unwrap();
 
-        assert_eq!(three.sub(&two).to_str().as_slice(), "1");
-        assert_eq!((three - two).to_str().as_slice(), "1");
+        assert_eq!(three.sub(&two).to_string().as_slice(), "1");
+        assert_eq!((three - two).to_string().as_slice(), "1");
     }
 
     #[test]
@@ -604,8 +609,8 @@ mod test_bigint {
         let two: BigInt = FromPrimitive::from_uint(2).unwrap();
         let three: BigInt = FromPrimitive::from_uint(3).unwrap();
 
-        assert_eq!(two.mul(&three).to_str().as_slice(), "6");
-        assert_eq!((two * three).to_str().as_slice(), "6");
+        assert_eq!(two.mul(&three).to_string().as_slice(), "6");
+        assert_eq!((two * three).to_string().as_slice(), "6");
     }
 
     #[test]

@@ -1,0 +1,14 @@
+[package]
+name = "rust-bignum"
+version = "0.0.1"
+authors = ["James Sanders <sanderjd@gmail.com>"]
+
+[lib]
+name = "bignum"
+path = "src/bignum/lib.rs"
+
+[dependencies.rust-gmp]
+path = "deps/rust-gmp"
+
+[dependencies.num]
+git = "https://github.com/rust-lang/num"

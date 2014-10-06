@@ -1,0 +1,4 @@
+[root]
+name = "rust-gmp"
+version = "0.1.1"
+

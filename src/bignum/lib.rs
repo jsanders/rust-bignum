@@ -11,3 +11,4 @@ extern crate num;
 extern crate rand;
 
 pub mod bigint;
+pub mod rational;

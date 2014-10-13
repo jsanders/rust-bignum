@@ -186,11 +186,11 @@ impl Integer for BigUint {
 
     #[inline]
     fn divides(&self, other: &BigUint) -> bool {
-        self.is_multiple_of(other)
+        other.is_multiple_of(self)
     }
 
     fn is_multiple_of(&self, other: &BigUint) -> bool {
-        self.data.divides(&other.data)
+        self.data.is_multiple_of(&other.data)
     }
 
     fn is_odd(&self) -> bool {
@@ -524,9 +524,9 @@ mod test_biguint {
         let three: BigUint = FromPrimitive::from_uint(3).unwrap();
         let six: BigUint = FromPrimitive::from_uint(6).unwrap();
 
-        assert!(two.is_multiple_of(&six));
-        assert!(three.is_multiple_of(&six));
-        assert!(!two.is_multiple_of(&three));
+        assert!(six.is_multiple_of(&two));
+        assert!(six.is_multiple_of(&three));
+        assert!(!three.is_multiple_of(&two));
     }
 
     #[test]

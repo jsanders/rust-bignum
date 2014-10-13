@@ -1,8 +1,0 @@
-[package]
-name = "rust-gmp"
-version = "0.1.1"
-authors = ["Daniel Micay <danielmicay@gmail.com>"]
-
-[lib]
-name = "gmp"
-path = "gmp.rs"

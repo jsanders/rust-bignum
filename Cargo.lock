@@ -3,7 +3,7 @@ name = "rust-bignum"
 version = "0.0.1"
 dependencies = [
  "num 0.0.1 (git+https://github.com/rust-lang/num#9b6e014a8b9be2a312ce304b89a7c0e1ce87396b)",
- "rust-gmp 0.1.1",
+ "rust-gmp 0.2.0 (git+https://github.com/thestinger/rust-gmp#b4fa26bfcb397a0b204452eb1802f1c950f8d761)",
 ]
 
 [[package]]
@@ -13,5 +13,6 @@ source = "git+https://github.com/rust-lang/num#9b6e014a8b9be2a312ce304b89a7c0e1c
 
 [[package]]
 name = "rust-gmp"
-version = "0.1.1"
+version = "0.2.0"
+source = "git+https://github.com/thestinger/rust-gmp#b4fa26bfcb397a0b204452eb1802f1c950f8d761"
 

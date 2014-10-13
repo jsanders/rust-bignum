@@ -25,7 +25,7 @@ pub mod bigint {
 
 pub mod rational {
     pub use BigRational;
-    pub use BigRational as Ratio;
+    pub use BigRational as Ratio; // Hack to allow Ratio::new() and friends to work
 }
 
 #[deriving(Clone, PartialEq, Eq, PartialOrd, Ord, Zero)]

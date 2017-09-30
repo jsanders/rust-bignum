@@ -83,18 +83,18 @@ macro_rules! impl_to_biguint(
             }
         }
     }
-)
+);
 
-impl_to_biguint!(int,  FromPrimitive::from_int)
-impl_to_biguint!(i8,   FromPrimitive::from_i8)
-impl_to_biguint!(i16,  FromPrimitive::from_i16)
-impl_to_biguint!(i32,  FromPrimitive::from_i32)
-impl_to_biguint!(i64,  FromPrimitive::from_i64)
-impl_to_biguint!(uint, FromPrimitive::from_uint)
-impl_to_biguint!(u8,   FromPrimitive::from_u8)
-impl_to_biguint!(u16,  FromPrimitive::from_u16)
-impl_to_biguint!(u32,  FromPrimitive::from_u32)
-impl_to_biguint!(u64,  FromPrimitive::from_u64)
+impl_to_biguint!(int,  FromPrimitive::from_int);
+impl_to_biguint!(i8,   FromPrimitive::from_i8);
+impl_to_biguint!(i16,  FromPrimitive::from_i16);
+impl_to_biguint!(i32,  FromPrimitive::from_i32);
+impl_to_biguint!(i64,  FromPrimitive::from_i64);
+impl_to_biguint!(uint, FromPrimitive::from_uint);
+impl_to_biguint!(u8,   FromPrimitive::from_u8);
+impl_to_biguint!(u16,  FromPrimitive::from_u16);
+impl_to_biguint!(u32,  FromPrimitive::from_u32);
+impl_to_biguint!(u64,  FromPrimitive::from_u64);
 
 impl FromStr for BigUint {
     fn from_str(s: &str) -> Option<BigUint> {

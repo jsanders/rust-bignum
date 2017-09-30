@@ -83,18 +83,18 @@ macro_rules! impl_to_biguint(
             }
         }
     }
-)
+);
 
-impl_to_biguint!(int,  FromPrimitive::from_int)
-impl_to_biguint!(i8,   FromPrimitive::from_i8)
-impl_to_biguint!(i16,  FromPrimitive::from_i16)
-impl_to_biguint!(i32,  FromPrimitive::from_i32)
-impl_to_biguint!(i64,  FromPrimitive::from_i64)
-impl_to_biguint!(uint, FromPrimitive::from_uint)
-impl_to_biguint!(u8,   FromPrimitive::from_u8)
-impl_to_biguint!(u16,  FromPrimitive::from_u16)
-impl_to_biguint!(u32,  FromPrimitive::from_u32)
-impl_to_biguint!(u64,  FromPrimitive::from_u64)
+impl_to_biguint!(int,  FromPrimitive::from_int);
+impl_to_biguint!(i8,   FromPrimitive::from_i8);
+impl_to_biguint!(i16,  FromPrimitive::from_i16);
+impl_to_biguint!(i32,  FromPrimitive::from_i32);
+impl_to_biguint!(i64,  FromPrimitive::from_i64);
+impl_to_biguint!(uint, FromPrimitive::from_uint);
+impl_to_biguint!(u8,   FromPrimitive::from_u8);
+impl_to_biguint!(u16,  FromPrimitive::from_u16);
+impl_to_biguint!(u32,  FromPrimitive::from_u32);
+impl_to_biguint!(u64,  FromPrimitive::from_u64);
 
 impl FromStr for BigUint {
     fn from_str(s: &str) -> Option<BigUint> {
@@ -362,7 +362,7 @@ mod test_biguint {
 
     #[test]
     fn test_clone() {
-        let two = 2u.to_biguint().unwrap();
+        let two = 2u32.to_biguint().unwrap();
         let also_two = two.clone();
         assert_eq!(two.to_string(), also_two.to_string());
     }
@@ -387,22 +387,22 @@ mod test_biguint {
 
     #[test]
     fn test_to_biguint() {
-        let three = 3u.to_biguint().unwrap();
+        let three = 3u32.to_biguint().unwrap();
         assert_eq!(three.to_string().as_slice(), "3");
     }
 
     #[test]
     fn test_to_bigint() {
-        let three = 3u.to_biguint().unwrap();
-        let four = 4u.to_biguint().unwrap();
+        let three = 3u32.to_biguint().unwrap();
+        let four = 4u32.to_biguint().unwrap();
         assert!(three.to_bigint().unwrap() - four.to_bigint().unwrap() < Zero::zero())
     }
 
     #[test]
     fn test_comparisons() {
-        let two = 2u.to_biguint().unwrap();
-        let also_two = 2u.to_biguint().unwrap();
-        let three = 3u.to_biguint().unwrap();
+        let two = 2u32.to_biguint().unwrap();
+        let also_two = 2u32.to_biguint().unwrap();
+        let three = 3u32.to_biguint().unwrap();
         assert!(two == also_two);
         assert!(two >= also_two);
         assert!(two <= also_two);

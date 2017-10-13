@@ -10,13 +10,23 @@ extern crate gmp;
 extern crate num;
 extern crate rand;
 
-use gmp::{Mpz, RandState};
+use gmp::{Mpz, Mpq, RandState};
 use std::fmt;
 use std::from_str::FromStr;
 use std::num::{One, Zero, ToStrRadix};
 use libc::c_ulong;
 use rand::Rng;
 use num::Integer;
+
+pub mod bigint {
+    pub use BigInt;
+    pub use ToBigInt;
+}
+
+pub mod rational {
+    pub use BigRational;
+    pub use BigRational as Ratio; // Hack to allow Ratio::new() and friends to work
+}
 
 #[deriving(Clone, PartialEq, Eq, PartialOrd, Ord, Zero)]
 pub struct BigUint {
@@ -301,6 +311,27 @@ impl ToBigInt for BigUint {
     }
 }
 
+macro_rules! impl_to_bigint(
+    ($T:ty, $from_ty:path) => {
+        impl ToBigInt for $T {
+            fn to_bigint(&self) -> Option<BigInt> {
+                $from_ty(*self)
+            }
+        }
+    }
+)
+
+impl_to_bigint!(int,  FromPrimitive::from_int)
+impl_to_bigint!(i8,   FromPrimitive::from_i8)
+impl_to_bigint!(i16,  FromPrimitive::from_i16)
+impl_to_bigint!(i32,  FromPrimitive::from_i32)
+impl_to_bigint!(i64,  FromPrimitive::from_i64)
+impl_to_bigint!(uint, FromPrimitive::from_uint)
+impl_to_bigint!(u8,   FromPrimitive::from_u8)
+impl_to_bigint!(u16,  FromPrimitive::from_u16)
+impl_to_bigint!(u32,  FromPrimitive::from_u32)
+impl_to_bigint!(u64,  FromPrimitive::from_u64)
+
 pub trait RandBigInt {
     /// Generate a random `BigUint` of the given bit size.
     fn gen_biguint(&mut self, bit_size: uint) -> BigUint;
@@ -348,6 +379,48 @@ impl<R: Rng> RandBigInt for R {
         // assert!(lbound < ubound);
 
         return *lbound + self.gen_biguint_below(&(*ubound - *lbound));
+    }
+}
+
+#[deriving(Clone, PartialEq, Eq, PartialOrd, Ord, Zero)]
+pub struct BigRational {
+    data: Mpq
+}
+
+impl BigRational {
+    pub fn new(numer: BigInt, denom: BigInt) -> BigRational {
+        BigRational::from_integer(numer) / BigRational::from_integer(denom)
+    }
+
+    pub fn from_integer(t: BigInt) -> BigRational {
+        let mut res = BigRational{ data: Mpq::new() };
+        res.data.set_z(&t.data);
+
+        res
+    }
+}
+
+impl One for BigRational {
+    fn one() -> BigRational {
+        BigRational{ data: One::one() }
+    }
+}
+
+impl Add<BigRational, BigRational> for BigRational {
+    fn add(&self, other: &BigRational) -> BigRational {
+        BigRational{ data: self.data.add(&other.data) }
+    }
+}
+
+impl Mul<BigRational, BigRational> for BigRational {
+    fn mul(&self, other: &BigRational) -> BigRational {
+        BigRational{ data: self.data.mul(&other.data) }
+    }
+}
+
+impl Div<BigRational, BigRational> for BigRational {
+    fn div(&self, other: &BigRational) -> BigRational {
+        BigRational{ data: self.data.div(&other.data) }
     }
 }
 
